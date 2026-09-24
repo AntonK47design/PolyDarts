@@ -19,6 +19,17 @@ function scoreAt(x, y) {
 }
 const gauss = () => (Math.random()+Math.random()+Math.random()-1.5) / 1.5;
 
+// Throw feel. All tuning lives here. Board radius R = 1.5; gauss() has sd ≈ 1/3, so a scatter of s lands within ~s/3.
+const AIM = {
+  wobIdle:.24, wobSteady:.08, wobMax:.42, wobOver:.3,     // reticle sway: while settling, in the green window, cap, growth/s once over-held
+  settle:1.0, steadyLen:.5, steadyJitter:.15,             // s of stillness until green, green window length, ± random start per throw
+  stillV:.15,                                             // drag speed (board units, smoothed) above which the settle timer restarts
+  scatBase:.13, scatWob:.9, rushed:2.2, rushedPow:1.5,    // landing spread; rushed = extra spread for releasing before green
+  dragWob:.08, dragScat:.05,                              // extra sway / spread from recent dragging
+  fatigue:.25, fatigueDecay:2.5,                          // sway added per throw, decaying per s — punishes rapid fire
+  cooldown:.5, blitzCooldown:.5, hotBonus:1.5,            // s between darts; Blitz time bonus for a hot-number hit
+};
+
 export function createGame(el, cb = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias:true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
@@ -154,6 +165,7 @@ export function createGame(el, cb = {}) {
   }
   const SFX = {
     click: () => tone(880, .06, 'square', .035, 1.2),
+    tick: () => tone(1560, .05, 'sine', .05, 1),
     whoosh: () => tone(900, .18, 'sine', .05, .3),
     thunk: () => { tone(120, .14, 'triangle', .4, .5); tone(2400, .03, 'square', .03, .5); },
     double: () => { SFX.thunk(); tone(660, .12, 'triangle', .12, 1, .04); tone(990, .16, 'triangle', .1, 1, .1); },
@@ -170,7 +182,9 @@ export function createGame(el, cb = {}) {
   // state
   let opts = { sound:true, difficulty:1 };
   let mode = 'menu', paused = false, t = 0, last = performance.now(), raf = 0, shake = 0, dist = 11;
-  let G = null, holding = false, holdT = 0, dragV = 0, curA = .13, readyIn = 0, heldK = 0, lp = null, emitKey = '';
+  let G = null, holding = false, holdT = 0, dragV = 0, curA = .13, readyIn = 0, heldK = 0, lp = null, pid = null, emitKey = '';
+  let steadyAt = AIM.settle, fat = 0, wobIn = 0, wasSteady = false;
+  const wob = { x:0, y:0 }, wobTo = { x:0, y:0 };
   const aim = { x:0, y:0 }, aimP = new THREE.Vector2();
   const flying = [], stuck = [], timers = [];
   const later = (s, fn) => timers.push({ s, fn });
@@ -237,9 +251,9 @@ export function createGame(el, cb = {}) {
     if (force || k !== emitKey) { emitKey = k; cb.onHud && cb.onHud(hud()); }
   }
   function stars() {
-    if (G.mode === 'classic') return !G.won ? 0 : G.darts <= 15 ? 3 : G.darts <= 27 ? 2 : 1;
-    if (G.mode === 'clock') return !G.won ? 0 : G.darts <= 30 ? 3 : G.darts <= 45 ? 2 : 1;
-    return G.score >= 1500 ? 3 : G.score >= 900 ? 2 : G.score >= 400 ? 1 : 0;
+    if (G.mode === 'classic') return !G.won ? 0 : G.darts <= 12 ? 3 : G.darts <= 21 ? 2 : 1;
+    if (G.mode === 'clock') return !G.won ? 0 : G.darts <= 26 ? 3 : G.darts <= 38 ? 2 : 1;
+    return G.score >= 2100 ? 3 : G.score >= 1300 ? 2 : G.score >= 700 ? 1 : 0;
   }
   function finish(won) {
     if (G.over) return;
@@ -289,10 +303,12 @@ export function createGame(el, cb = {}) {
       cb.onHit && cb.onHit(hit);
       if (G.turn.length === 3) endTurn();
     } else {
-      if (res.score > 0) {
+      const clean = steady || res.ring !== 'single' || res.n === G.hot;
+      if (res.score > 0 && !clean) { hit.extra = G.streak >= 3 ? 'RUSHED · COMBO LOST' : 'RUSHED'; G.streak = 0; G.mult = 1; G.score += res.score; }
+      else if (res.score > 0) {
         G.streak++; G.mult = Math.min(5, 1 + Math.floor(G.streak/3)); st.maxMult = Math.max(st.maxMult, G.mult);
         let pts = res.score * G.mult;
-        if (res.n === G.hot) { st.hotHits++; pts *= 2; G.time += 3; hit.extra = 'HOT ×2 · +3s'; let h; do { h = ORDER[Math.floor(Math.random()*20)]; } while (h === G.hot); G.hot = h; }
+        if (res.n === G.hot) { st.hotHits++; pts *= 2; G.time += AIM.hotBonus; hit.extra = 'HOT ×2 · +' + AIM.hotBonus + 's'; let h; do { h = ORDER[Math.floor(Math.random()*20)]; } while (h === G.hot); G.hot = h; }
         else if (G.mult > 1) hit.extra = '×' + G.mult;
         if (G.streak % 3 === 0 && G.mult > 1) SFX.combo(G.mult);
         G.score += pts; hit.pts = pts;
@@ -304,17 +320,19 @@ export function createGame(el, cb = {}) {
     emit(true);
   }
 
+  function phase(h) { return h < steadyAt ? 'settle' : h < steadyAt + AIM.steadyLen ? 'steady' : 'over'; }
   function canThrow() { return mode === 'play' && !paused && G && !G.over && !G.lock && readyIn <= 0 && (G.mode === 'blitz' || G.thrown < 3); }
   function throwDart() {
     if (!canThrow()) return;
-    const sc = curA * .4 + .025 + Math.max(0, 1 - holdT) * .32 * opts.difficulty + Math.min(.25, dragV * .05);
+    const sc = curA * AIM.scatWob + AIM.scatBase + Math.pow(Math.max(0, 1 - holdT/steadyAt), AIM.rushedPow) * AIM.rushed * opts.difficulty + Math.min(.25, dragV * AIM.dragScat);
     const px = aimP.x + gauss()*sc, py = aimP.y + gauss()*sc;
     const pre = scoreAt(px, py);
     const g = makeDart(); g.position.copy(held.position); g.quaternion.copy(held.quaternion); scene.add(g);
-    const steady = holdT >= 1 && holdT < 1.9;
+    const steady = phase(holdT) === 'steady';
     flying.push({ g, from:held.position.clone(), to:new THREE.Vector3(px, BY+py, DEPTH[pre.ring]-.03), t:0, dur:.26 });
     flying[flying.length-1].steady = steady;
-    G.thrown++; readyIn = G.mode === 'blitz' ? .32 : .5; heldK = 0; held.visible = false;
+    G.thrown++; readyIn = G.mode === 'blitz' ? AIM.blitzCooldown : AIM.cooldown; heldK = 0; held.visible = false;
+    fat += AIM.fatigue; steadyAt = AIM.settle + (Math.random()*2 - 1) * AIM.steadyJitter;
     SFX.whoosh(); emit(true);
   }
   function arrive(f) {
@@ -335,16 +353,19 @@ export function createGame(el, cb = {}) {
   }
 
   // input
-  const onDown = e => { if (!canThrow()) return; holding = true; holdT = 0; lp = { x:e.clientX, y:e.clientY }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cb.onAim && cb.onAim(); };
+  const onDown = e => { if (holding || !canThrow()) return; holding = true; holdT = 0; pid = e.pointerId; lp = { x:e.clientX, y:e.clientY }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cb.onAim && cb.onAim(); };
   const onMove = e => {
-    if (!holding) return;
+    if (!holding || e.pointerId !== pid) return;
     const s = 1.9*R / Math.max(320, el.clientWidth);
     aim.x += (e.clientX - lp.x)*s; aim.y -= (e.clientY - lp.y)*s; dragV += Math.hypot(e.clientX - lp.x, e.clientY - lp.y)*s*4; lp = { x:e.clientX, y:e.clientY };
     const l = Math.hypot(aim.x, aim.y), mx = R*1.35; if (l > mx) { aim.x *= mx/l; aim.y *= mx/l; }
   };
-  const onUp = () => { if (!holding) return; holding = false; throwDart(); };
+  const onUp = e => { if (!holding || e.pointerId !== pid) return; holding = false; throwDart(); };
+  const onCancel = e => { if (e.pointerId === pid) holding = false; };
+  const onBlur = () => { holding = false; };
   cv.addEventListener('pointerdown', onDown); cv.addEventListener('pointermove', onMove);
-  cv.addEventListener('pointerup', onUp); cv.addEventListener('pointercancel', () => { holding = false; });
+  cv.addEventListener('pointerup', onUp); cv.addEventListener('pointercancel', onCancel);
+  window.addEventListener('blur', onBlur); document.addEventListener('visibilitychange', onBlur);
 
   function update(dt) {
     t += dt;
@@ -369,15 +390,20 @@ export function createGame(el, cb = {}) {
     }
     // aim
     if (playing) {
-      if (holding) holdT += dt;
-      dragV *= Math.exp(-dt*6);
-      let A = !holding ? .2 : holdT < 1 ? .2 - .145*(holdT/1) : holdT < 1.9 ? .055 : Math.min(.42, .055 + (holdT-1.9)*.22);
-      A += Math.min(.2, dragV*.08);
+      if (holding) holdT = dragV > AIM.stillV ? 0 : holdT + dt;
+      dragV *= Math.exp(-dt*6); fat *= Math.exp(-dt*AIM.fatigueDecay);
+      const ph = phase(holdT), steadyNow = holding && ph === 'steady';
+      if (steadyNow && !wasSteady) SFX.tick(); wasSteady = steadyNow;
+      let A = !holding ? AIM.wobIdle : ph === 'settle' ? AIM.wobIdle - (AIM.wobIdle - AIM.wobSteady)*(holdT/steadyAt) : ph === 'steady' ? AIM.wobSteady : AIM.wobSteady + (holdT - steadyAt - AIM.steadyLen)*AIM.wobOver;
+      A = Math.min(AIM.wobMax, A + Math.min(.2, dragV*AIM.dragWob) + fat);
       A *= opts.difficulty; curA += (A - curA)*Math.min(1, dt*8);
-      aimP.set(aim.x + curA*(Math.sin(t*2.3)*.6 + Math.sin(t*4.1+1.3)*.4), aim.y + curA*(Math.cos(t*1.9)*.6 + Math.sin(t*3.7+2.1)*.4) - (holding ? Math.min(1, holdT*1.2)*.06 : 0));
+      // sway: smoothed random walk towards a new point in the unit disc every ~0.25–0.55 s (not a learnable loop)
+      if ((wobIn -= dt) <= 0) { const a = Math.random()*Math.PI*2, r = Math.sqrt(Math.random())*1.3; wobTo.x = Math.cos(a)*r; wobTo.y = Math.sin(a)*r; wobIn = .25 + Math.random()*.3; }
+      const wk = 1 - Math.exp(-dt*5); wob.x += (wobTo.x - wob.x)*wk; wob.y += (wobTo.y - wob.y)*wk;
+      aimP.set(aim.x + curA*wob.x, aim.y + curA*wob.y - (holding ? Math.min(1, holdT*1.2)*.06 : 0));
       reticle.visible = readyIn <= 0 && (G.mode === 'blitz' || G.thrown < 3) && !G.lock;
-      reticle.position.set(aimP.x, BY + aimP.y, .25); reticle.scale.setScalar(.75 + curA*5);
-      retMat.color.set(holding && holdT >= 1 && holdT < 1.9 ? '#3ddc97' : holding && holdT >= 1.9 ? '#ff5a5f' : '#ffffff');
+      reticle.position.set(aimP.x, BY + aimP.y, .25); reticle.scale.setScalar((.75 + curA*5) * (steadyNow ? 1 + .1*Math.sin(t*16) : 1));
+      retMat.color.set(steadyNow ? '#3ddc97' : holding && ph === 'over' ? '#ff5a5f' : '#ffffff');
       held.visible = reticle.visible;
       if (held.visible) {
         heldK = Math.min(1, heldK + dt*5);
@@ -423,11 +449,11 @@ export function createGame(el, cb = {}) {
     stuck.forEach(s => s.g.parent && s.g.parent.remove(s.g)); stuck.length = 0;
   }
   return {
-    start(m) { reset(); spin.rotation.z = 0; G = newG(m); mode = 'play'; paused = false; aim.x = 0; aim.y = 0; readyIn = .9; holding = false; emit(true); },
+    start(m) { reset(); spin.rotation.z = 0; G = newG(m); mode = 'play'; paused = false; aim.x = 0; aim.y = 0; readyIn = .9; holding = false; fat = 0; steadyAt = AIM.settle; emit(true); },
     pause() { paused = true; holding = false; }, resume() { paused = false; },
     menu() { reset(); G = null; mode = 'menu'; paused = false; placeMenuDarts(); },
     shop(on) { if (mode === 'play') return; mode = on ? 'shop' : 'menu'; },
     setTheme, setSkin, setOptions(o) { Object.assign(opts, o); }, sfx(n, a) { SFX[n] && SFX[n](a); },
-    destroy() { cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); cv.remove(); },
+    destroy() { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener('blur', onBlur); document.removeEventListener('visibilitychange', onBlur); renderer.dispose(); cv.remove(); },
   };
 }

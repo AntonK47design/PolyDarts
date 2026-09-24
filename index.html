@@ -332,7 +332,7 @@ class Component extends DCLogic {
   static MODES = [
     { id:'classic', name:'301 Classic', glyph:'301', color:'#ff5a5f', desc:'Count down to exactly zero. Overshoot and you bust.' },
     { id:'clock', name:'Around the Clock', glyph:'1→20', color:'#3ddc97', desc:'Hit 1 to 20, then bull. Doubles and triples skip ahead.' },
-    { id:'blitz', name:'Blitz 45', glyph:'45s', color:'#ffc94a', desc:'Score fast. Chain hits for combos, hit the hot number for time.' },
+    { id:'blitz', name:'Blitz 45', glyph:'45s', color:'#ffc94a', desc:'Score fast. Chain steady hits for combos, hit the hot number for time.' },
   ];
   static MISSIONS = [
     { id:'bulls5', title:'Hit 5 bulls', key:'bulls', goal:5, reward:100 },
@@ -340,7 +340,7 @@ class Component extends DCLogic {
     { id:'ton', title:'Score 100+ in one turn', key:'tons', goal:1, reward:80 },
     { id:'win301', title:'Check out a game of 301', key:'wins301', goal:1, reward:120 },
     { id:'clock', title:'Finish Around the Clock', key:'clockWins', goal:1, reward:120 },
-    { id:'blitz900', title:'Score 900 in Blitz', key:'blitzBest', goal:900, reward:200 },
+    { id:'blitz900', title:'Score 1300 in Blitz', key:'blitzBest', goal:1300, reward:200 },
   ];
   static DT = (() => {
     const pk = (a, R) => a[Math.floor(R() * a.length)], MD = ['classic', 'clock', 'blitz'], N = v => t => ({ n:v[t] });
@@ -352,7 +352,7 @@ class Component extends DCLogic {
       { id:'trip', cat:'aim', make:(t, R) => ({ m:pk(MD, R), n:[3, 6, 10][t] }), text:p => `Land ${p.n} triples in ${MN[p.m]}`, val:(r, p) => r.mode === p.m ? r.stats.triples : 0 },
       { id:'dbl', cat:'aim', make:N([3, 6, 10]), text:p => `Hit ${p.n} doubles`, val:r => r.stats.doubles },
       { id:'clean', cat:'aim', make:N([2, 4, 6]), text:p => `Throw ${p.n} full turns without a miss`, val:r => r.stats.cleanTurns || 0 },
-      { id:'blitz', cat:'score', make:N([450, 750, 1100]), text:p => `Score ${p.n}+ in one Blitz round`, agg:'max', val:r => r.mode === 'blitz' ? r.score : 0 },
+      { id:'blitz', cat:'score', make:N([600, 1000, 1500]), text:p => `Score ${p.n}+ in one Blitz round`, agg:'max', val:r => r.mode === 'blitz' ? r.score : 0 },
       { id:'combo', cat:'score', make:N([3, 4, 5]), text:p => `Build a ×${p.n} combo in Blitz`, agg:'max', val:r => r.mode === 'blitz' ? (r.stats.maxMult || 1) : 0 },
       { id:'hot', cat:'score', make:N([2, 3, 5]), text:p => `Hit ${p.n} hot numbers in one Blitz`, agg:'max', val:r => r.mode === 'blitz' ? (r.stats.hotHits || 0) : 0 },
       { id:'ton', cat:'score', tiers:[1, 2], make:N([1, 1, 2]), text:p => p.n === 1 ? 'Score 100+ in a single 301 turn' : `Score 100+ in ${p.n} turns of 301`, val:r => r.stats.tons },
@@ -373,7 +373,7 @@ class Component extends DCLogic {
     let a = h >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   }
   stageRef = React.createRef();
-  state = { missionTab:'daily', now:Date.now(), screen:'home', paused:false, hud:null, pops:[], banners:[], result:null, profile:this.load(), shopTab:'darts', shopSel:null, gameCoins:0, hintSeen:false, loaded:false, coinDisp:0, lastMode:'classic' };
+  state = { missionTab:'daily', now:Date.now(), screen:'home', paused:false, hud:null, pops:[], banners:[], result:null, profile:this.load(), shopTab:'darts', shopSel:null, gameCoins:0, loaded:false, coinDisp:0, lastMode:'classic' };
   uid = 0;
 
   load() {
@@ -412,7 +412,8 @@ class Component extends DCLogic {
   skinById(id) { return Component.SKINS.find(s => s.id === id) || Component.SKINS[0]; }
   themeById(id) { return Component.THEMES.find(s => s.id === id) || Component.THEMES[0]; }
   xpNeed(l) { return 150 + (l - 1) * 100; }
-  diff() { return { Chill:.6, Normal:1, Pro:1.45 }[this.props.difficulty ?? 'Normal'] || 1; }
+  // base difficulty, ramping up to +25% as the player levels
+  diff() { return ({ Chill:.6, Normal:1, Pro:1.45 }[this.props.difficulty ?? 'Normal'] || 1) * (1 + Math.min(.25, (this.state.profile.level - 1) * .02)); }
   applyOpts() { this.engine && this.engine.setOptions({ sound:(this.props.sound ?? true) && !this.state.profile.muted, difficulty:this.diff() }); }
 
   async componentDidMount() {
@@ -420,7 +421,7 @@ class Component extends DCLogic {
       const mod = await import(new URL('polydarts-engine.js', document.baseURI).href);
       this.engine = mod.createGame(this.stageRef.current, {
         onHud:h => this.setState({ hud:h }), onHit:h => this.onHit(h), onTurn:t => this.onTurn(t),
-        onBanner:(a, b, c) => this.banner(a, b, c), onEnd:r => this.onEnd(r), onAim:() => !this.state.hintSeen && this.setState({ hintSeen:true }),
+        onBanner:(a, b, c) => this.banner(a, b, c), onEnd:r => this.onEnd(r),
       });
       const p = this.state.profile;
       this.engine.setTheme(this.themeById(p.theme)); this.engine.setSkin(this.skinById(p.skin));
@@ -444,7 +445,7 @@ class Component extends DCLogic {
   }
   startMode(id) {
     if (!this.engine) return;
-    this.click(); this.engine.start(id);
+    this.click(); this.applyOpts(); this.engine.start(id);
     this.setState({ screen:'game', paused:false, gameCoins:0, result:null, hud:null, lastMode:id, pops:[], banners:[] });
     const m = Component.MODES.find(x => x.id === id);
     setTimeout(() => this.banner(m.name.toUpperCase(), id === 'classic' ? '12 rounds · exact zero' : id === 'clock' ? '120 seconds' : 'Board starts spinning…', 'info'), 150);
@@ -464,6 +465,7 @@ class Component extends DCLogic {
     let sub = h.extra || (h.mode === 'blitz' && h.pts ? '+' + h.pts : '');
     if (h.steady && h.score) sub = (sub ? sub + ' · ' : '') + 'STEADY';
     this.pop({ x:h.sx, y:h.sy - 30, text:C[0], sub, color, size:C[2] });
+    if (h.steady && !this.state.profile.hintSeen) this.save({ ...this.state.profile, hintSeen:true });
     const coins = h.ring === 'bull' ? 5 : h.ring === 'obull' ? 2 : h.ring === 'triple' ? 3 : h.ring === 'double' ? 1 : 0;
     if (coins) { this.setState(s => ({ gameCoins:s.gameCoins + coins })); setTimeout(() => this.engine.sfx('coin'), 180); }
     this.buzz(h.ring === 'bull' ? [30, 40, 60] : h.ring === 'triple' ? [20, 30, 30] : h.score ? 14 : 6);
@@ -661,7 +663,7 @@ class Component extends DCLogic {
       hasClaimable:claimableCount > 0, claimableCount, modes, missions, shopItems, actionLabel, actionBg, actionFg,
       tabDartsBg:darts ? '#ff5a5f' : 'transparent', tabDartsFg:darts ? '#15112b' : '#c9c1f0', tabBoardsBg:!darts ? '#ff5a5f' : 'transparent', tabBoardsFg:!darts ? '#15112b' : '#c9c1f0',
       hudLabel, hudValue, hudSub, hudShadow, turnSlots, clockTicks, timePct, timeColor, showMult, multText, gameCoins:s.gameCoins,
-      isBlitz:!!h && h.mode === 'blitz', isClock:!!h && h.mode === 'clock', showHint:sc === 'game' && !s.hintSeen, res, coinDisp:s.coinDisp,
+      isBlitz:!!h && h.mode === 'blitz', isClock:!!h && h.mode === 'clock', showHint:sc === 'game' && !p.hintSeen, res, coinDisp:s.coinDisp,
       fxLayer:this.fx(),
       goHome:() => this.go('home'), goModes:() => this.go('modes'), goShop:() => this.go('shop'), goMissions:() => this.go('missions'),
       tabDarts:() => { this.click(); this.setState({ shopTab:'darts', shopSel:p.skin }); this.engine.setTheme(this.themeById(p.theme)); this.engine.setSkin(this.skinById(p.skin)); },
