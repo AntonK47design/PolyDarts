@@ -24,10 +24,10 @@ const AIM = {
   wobIdle:.24, wobSteady:.08, wobMax:.42, wobOver:.3,     // reticle sway: while settling, in the green window, cap, growth/s once over-held
   settle:1.0, steadyLen:.5, steadyJitter:.15,             // s of stillness until green, green window length, ± random start per throw
   stillV:.15,                                             // drag speed (board units, smoothed) above which the settle timer restarts
-  scatBase:.13, scatWob:.9, rushed:2.2, rushedPow:1.5,    // landing spread; rushed = extra spread for releasing before green
+  scatBase:.13, scatWob:.9, rushed:4, rushedPow:.8,       // landing spread; rushed = extra spread for releasing before green
   dragWob:.08, dragScat:.05,                              // extra sway / spread from recent dragging
   fatigue:.25, fatigueDecay:2.5,                          // sway added per throw, decaying per s — punishes rapid fire
-  cooldown:.5, blitzCooldown:.5, hotBonus:1.5,            // s between darts; Blitz time bonus for a hot-number hit
+  cooldown:.5, blitzCooldown:.5, hotBonus:1.5, blitzMiss:1, // s between darts; Blitz time bonus for a hot hit / time lost on a miss
 };
 
 export function createGame(el, cb = {}) {
@@ -312,7 +312,7 @@ export function createGame(el, cb = {}) {
         else if (G.mult > 1) hit.extra = '×' + G.mult;
         if (G.streak % 3 === 0 && G.mult > 1) SFX.combo(G.mult);
         G.score += pts; hit.pts = pts;
-      } else { if (G.streak >= 3) hit.extra = 'COMBO LOST'; G.streak = 0; G.mult = 1; }
+      } else { hit.extra = (G.streak >= 3 ? 'COMBO LOST · ' : '') + '-' + AIM.blitzMiss + 's'; G.time = Math.max(0, G.time - AIM.blitzMiss); G.streak = 0; G.mult = 1; }
       G.recent.push({ label:res.label, score:hit.pts });
       cb.onHit && cb.onHit(hit);
       const live = stuck.filter(s => !s.dying); if (live.length > 3) live[0].dying = .001;
