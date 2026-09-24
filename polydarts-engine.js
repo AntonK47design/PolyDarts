@@ -225,7 +225,7 @@ export function createGame(el, cb = {}) {
   function newG(m) {
     return { mode:m, darts:0, thrown:0, turn:[], round:1, remaining:301, turnStart:301, target:1, score:0, streak:0, mult:1,
       time: m === 'blitz' ? 45 : 0, elapsed:0, over:false, lock:false, hot:ORDER[Math.floor(Math.random()*20)], recent:[],
-      stats:{ bulls:0, bullseyes:0, triples:0, doubles:0, misses:0, hits:0, bestTurn:0, tons:0 } };
+      stats:{ bulls:0, bullseyes:0, triples:0, doubles:0, misses:0, hits:0, bestTurn:0, tons:0, nums:{}, maxMult:1, hotHits:0, cleanTurns:0, dout:0 } };
   }
   function hud() {
     return { mode:G.mode, remaining:G.remaining, round:G.round, turn:G.mode === 'blitz' ? G.recent.slice(-3) : G.turn.slice(),
@@ -250,6 +250,7 @@ export function createGame(el, cb = {}) {
   }
   function endTurn() {
     const total = G.turn.reduce((a, b) => a + b.score, 0);
+    if (!G.busted && G.turn.length === 3 && G.turn.every(x => x.score > 0)) G.stats.cleanTurns++;
     if (G.mode === 'classic' && !G.busted) {
       G.stats.bestTurn = Math.max(G.stats.bestTurn, total);
       if (total >= 100) { G.stats.tons++; SFX.ton(); }
@@ -267,7 +268,7 @@ export function createGame(el, cb = {}) {
     const st = G.stats; G.darts++;
     if (res.ring === 'bull') { st.bulls++; st.bullseyes++; } else if (res.ring === 'obull') st.bulls++;
     else if (res.ring === 'triple') st.triples++; else if (res.ring === 'double') st.doubles++;
-    if (res.score > 0) st.hits++; else st.misses++;
+    if (res.score > 0) { st.hits++; st.nums[res.n] = (st.nums[res.n] || 0) + 1; } else st.misses++;
     const v = world.clone().project(camera);
     const hit = { ...res, mode:G.mode, sx:(v.x+1)/2*el.clientWidth, sy:(1-v.y)/2*el.clientHeight, steady, pts:res.score, extra:'', good:res.score > 0 };
     if (G.mode === 'classic') {
@@ -276,7 +277,7 @@ export function createGame(el, cb = {}) {
       if (nr < 0) { G.busted = true; G.remaining = G.turnStart; SFX.bust(); cb.onBanner && cb.onBanner('BUST', 'Back to ' + G.turnStart, 'bad'); cb.onHit && cb.onHit(hit); endTurn(); emit(true); return; }
       G.remaining = nr; hit.extra = res.score ? '-' + res.score : '';
       cb.onHit && cb.onHit(hit);
-      if (nr === 0) { finish(true); cb.onBanner && cb.onBanner('CHECKOUT!', G.darts + ' darts', 'win'); }
+      if (nr === 0) { st.dout = (res.m === 2 || res.ring === 'bull') ? 1 : 0; finish(true); cb.onBanner && cb.onBanner('CHECKOUT!', G.darts + ' darts', 'win'); }
       else if (G.turn.length === 3) endTurn();
     } else if (G.mode === 'clock') {
       G.turn.push({ label:res.label, score:res.score });
@@ -289,9 +290,9 @@ export function createGame(el, cb = {}) {
       if (G.turn.length === 3) endTurn();
     } else {
       if (res.score > 0) {
-        G.streak++; G.mult = Math.min(5, 1 + Math.floor(G.streak/3));
+        G.streak++; G.mult = Math.min(5, 1 + Math.floor(G.streak/3)); st.maxMult = Math.max(st.maxMult, G.mult);
         let pts = res.score * G.mult;
-        if (res.n === G.hot) { pts *= 2; G.time += 3; hit.extra = 'HOT ×2 · +3s'; let h; do { h = ORDER[Math.floor(Math.random()*20)]; } while (h === G.hot); G.hot = h; }
+        if (res.n === G.hot) { st.hotHits++; pts *= 2; G.time += 3; hit.extra = 'HOT ×2 · +3s'; let h; do { h = ORDER[Math.floor(Math.random()*20)]; } while (h === G.hot); G.hot = h; }
         else if (G.mult > 1) hit.extra = '×' + G.mult;
         if (G.streak % 3 === 0 && G.mult > 1) SFX.combo(G.mult);
         G.score += pts; hit.pts = pts;

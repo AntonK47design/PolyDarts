@@ -121,8 +121,56 @@ a{color:#ffc94a}a:hover{color:#fff4e0}
 
     <sc-if value="{{ isMissions }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Missions" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to bottom,rgba(21,17,43,.2),rgba(21,17,43,.9) 40%)">
-        <div style="padding:0 18px 26px;display:flex;flex-direction:column;gap:10px;animation:pd-up .35s cubic-bezier(.2,.9,.3,1.2) both">
-          <div style="font-family:Bungee;font-size:30px;text-shadow:3px 3px 0 #3ddc97">MISSIONS</div>
+        <div style="max-height:100%;overflow-y:auto;padding:16px 18px 26px;display:flex;flex-direction:column;gap:10px;animation:pd-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div style="font-family:Bungee;font-size:30px;text-shadow:3px 3px 0 #3ddc97">MISSIONS</div>
+            <div style="height:34px;padding:0 12px 0 9px;display:flex;align-items:center;gap:7px;background:rgba(21,17,43,.8);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)">
+              <div style="width:13px;height:16px;background:{{ streakColor }};clip-path:polygon(50% 0,100% 60%,50% 100%,0 60%)"></div>
+              <div style="font-family:Bungee;font-size:13px;color:{{ streakColor }}">{{ streakText }}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#15112b;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)">
+            <div onClick="{{ tabDaily }}" style="height:40px;display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:15px;background:{{ tabDailyBg }};color:{{ tabDailyFg }};clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">DAILY</div>
+            <div onClick="{{ tabMile }}" style="height:40px;display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:15px;background:{{ tabMileBg }};color:{{ tabMileFg }};clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">MILESTONES</div>
+          </div>
+          <sc-if value="{{ isDailyTab }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 2px 0;font-size:12px;font-weight:700;letter-spacing:.14em;color:#c9c1f0">
+              <span>NEW SET IN {{ resetIn }}</span>
+              <span style="color:{{ rerollColor }}">{{ rerollText }}</span>
+            </div>
+            <sc-for list="{{ dailies }}" as="d" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#241e4a;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)">
+                <div style="flex:none;width:40px;height:44px;background:{{ d.tierColor }};clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:16px;color:#15112b">{{ d.tierLetter }}</div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                  <div style="font-size:15px;font-weight:700;line-height:1.2;text-wrap:pretty">{{ d.title }}</div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;height:7px;background:rgba(255,244,224,.12)"><div style="height:100%;width:{{ d.pct }};background:{{ d.tierColor }};transition:width .6s"></div></div>
+                    <div style="font-size:12px;font-weight:700;color:#c9c1f0;min-width:48px;text-align:right">{{ d.prog }}</div>
+                  </div>
+                </div>
+                <div style="flex:none;width:84px;display:flex;flex-direction:column;gap:6px">
+                  <div onClick="{{ d.onClaim }}" style="height:44px;display:flex;align-items:center;justify-content:center;background:{{ d.btnBg }};color:{{ d.btnFg }};font-family:Bungee;font-size:14px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">{{ d.btn }}</div>
+                  <sc-if value="{{ d.canReroll }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ d.onReroll }}" style="height:28px;display:flex;align-items:center;justify-content:center;background:rgba(255,244,224,.08);color:#c9c1f0;font-size:11px;font-weight:700;letter-spacing:.16em;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);cursor:pointer">SWAP</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:#2f2760;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)">
+              <div style="flex:none;width:52px;height:56px;background:#ffc94a;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:flex;align-items:center;justify-content:center"><div style="width:20px;height:24px;background:#15112b;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)"></div></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+                <div style="font-family:Bungee;font-size:17px">DAILY CHEST</div>
+                <div style="font-size:13px;font-weight:600;color:#c9c1f0;text-wrap:pretty">{{ chestSub }}</div>
+                <div style="display:flex;gap:5px">
+                  <sc-for list="{{ chestPips }}" as="cp" hint-placeholder-count="3">
+                    <div style="width:14px;height:16px;background:{{ cp.color }};clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)"></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div onClick="{{ openChest }}" style="flex:none;width:84px;height:48px;display:flex;align-items:center;justify-content:center;background:{{ chestBtnBg }};color:{{ chestBtnFg }};font-family:Bungee;font-size:14px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">{{ chestBtn }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isMileTab }}" hint-placeholder-val="{{ false }}">
           <sc-for list="{{ missions }}" as="ms" hint-placeholder-count="6">
             <div style="display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;background:#241e4a;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)">
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
@@ -135,7 +183,8 @@ a{color:#ffc94a}a:hover{color:#fff4e0}
               <div onClick="{{ ms.onClaim }}" style="flex:none;width:84px;height:44px;display:flex;align-items:center;justify-content:center;gap:5px;background:{{ ms.btnBg }};color:{{ ms.btnFg }};font-family:Bungee;font-size:14px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">{{ ms.btn }}</div>
             </div>
           </sc-for>
-          <div onClick="{{ goHome }}" style="height:54px;display:flex;align-items:center;justify-content:center;background:rgba(47,39,96,.8);font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">BACK</div>
+          </sc-if>
+          <div onClick="{{ goHome }}" style="flex:none;height:54px;display:flex;align-items:center;justify-content:center;background:rgba(47,39,96,.8);font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">BACK</div>
         </div>
       </div>
     </sc-if>
@@ -235,6 +284,17 @@ a{color:#ffc94a}a:hover{color:#fff4e0}
               <div style="height:8px;background:rgba(255,244,224,.14)"><div style="height:100%;width:{{ xpPct }};background:#3ddc97;transition:width 1s .4s"></div></div>
             </div>
           </div>
+          <sc-if value="{{ res.hasDaily }}" hint-placeholder-val="{{ false }}">
+            <div style="width:100%;display:flex;flex-direction:column;gap:6px">
+              <sc-for list="{{ res.daily }}" as="dt" hint-placeholder-count="1">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:{{ dt.bg }};clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)">
+                  <div style="flex:none;width:12px;height:14px;background:{{ dt.color }};clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)"></div>
+                  <div style="flex:1;min-width:0;font-size:13px;font-weight:700;color:{{ dt.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dt.title }}</div>
+                  <div style="flex:none;font-family:Bungee;font-size:13px;color:{{ dt.fg }}">{{ dt.prog }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
           <sc-if value="{{ res.levelUp }}" hint-placeholder-val="{{ false }}">
             <div style="padding:8px 18px;background:#7b5cff;font-family:Bungee;font-size:18px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);animation:pd-pop .6s .9s both">LEVEL UP · {{ level }}</div>
           </sc-if>
@@ -282,14 +342,71 @@ class Component extends DCLogic {
     { id:'clock', title:'Finish Around the Clock', key:'clockWins', goal:1, reward:120 },
     { id:'blitz900', title:'Score 900 in Blitz', key:'blitzBest', goal:900, reward:200 },
   ];
+  static DT = (() => {
+    const pk = (a, R) => a[Math.floor(R() * a.length)], MD = ['classic', 'clock', 'blitz'], N = v => t => ({ n:v[t] });
+    const MN = { classic:'301', clock:'Around the Clock', blitz:'Blitz' }, one = () => 1;
+    return [
+      { id:'bulls', cat:'aim', make:N([3, 5, 8]), text:p => `Hit ${p.n} bulls`, val:r => r.stats.bulls },
+      { id:'eye', cat:'aim', make:N([1, 2, 4]), text:p => p.n === 1 ? 'Land a dead-center bullseye' : `Land ${p.n} bullseyes`, val:r => r.stats.bullseyes },
+      { id:'num', cat:'aim', make:(t, R) => ({ x:pk([20, 19, 18, 17, 16, 15, 14, 11, 6, 3], R), n:[4, 6, 9][t] }), text:p => `Hit the ${p.x} segment ${p.n} times`, val:(r, p) => (r.stats.nums || {})[p.x] || 0 },
+      { id:'trip', cat:'aim', make:(t, R) => ({ m:pk(MD, R), n:[3, 6, 10][t] }), text:p => `Land ${p.n} triples in ${MN[p.m]}`, val:(r, p) => r.mode === p.m ? r.stats.triples : 0 },
+      { id:'dbl', cat:'aim', make:N([3, 6, 10]), text:p => `Hit ${p.n} doubles`, val:r => r.stats.doubles },
+      { id:'clean', cat:'aim', make:N([2, 4, 6]), text:p => `Throw ${p.n} full turns without a miss`, val:r => r.stats.cleanTurns || 0 },
+      { id:'blitz', cat:'score', make:N([450, 750, 1100]), text:p => `Score ${p.n}+ in one Blitz round`, agg:'max', val:r => r.mode === 'blitz' ? r.score : 0 },
+      { id:'combo', cat:'score', make:N([3, 4, 5]), text:p => `Build a ×${p.n} combo in Blitz`, agg:'max', val:r => r.mode === 'blitz' ? (r.stats.maxMult || 1) : 0 },
+      { id:'hot', cat:'score', make:N([2, 3, 5]), text:p => `Hit ${p.n} hot numbers in one Blitz`, agg:'max', val:r => r.mode === 'blitz' ? (r.stats.hotHits || 0) : 0 },
+      { id:'ton', cat:'score', tiers:[1, 2], make:N([1, 1, 2]), text:p => p.n === 1 ? 'Score 100+ in a single 301 turn' : `Score 100+ in ${p.n} turns of 301`, val:r => r.stats.tons },
+      { id:'turn', cat:'score', tiers:[0, 1], make:N([45, 70, 100]), text:p => `Score ${p.n}+ in one 301 turn`, agg:'max', val:r => r.mode === 'classic' ? r.stats.bestTurn : 0 },
+      { id:'fast', cat:'win', make:N([33, 24, 18]), text:p => `Check out 301 in ${p.n} darts or fewer`, goal:one, agg:'max', val:(r, p) => r.mode === 'classic' && r.win && r.darts <= p.n ? 1 : 0 },
+      { id:'dout', cat:'win', tiers:[1, 2], text:() => 'Finish 301 on a double or bull', goal:one, agg:'max', val:r => r.mode === 'classic' && r.win && r.stats.dout ? 1 : 0 },
+      { id:'clockf', cat:'win', make:N([60, 42, 32]), text:p => `Finish Around the Clock in ${p.n} darts or fewer`, goal:one, agg:'max', val:(r, p) => r.mode === 'clock' && r.win && r.darts <= p.n ? 1 : 0 },
+      { id:'acc', cat:'win', make:N([55, 70, 85]), text:p => `Finish a game with ${p.n}%+ accuracy`, goal:one, agg:'max', val:(r, p) => (r.win || r.mode === 'blitz') && r.acc >= p.n ? 1 : 0 },
+      { id:'modes', cat:'play', tiers:[0], text:() => 'Play all three modes', goal:() => 3, agg:'set' },
+      { id:'stars', cat:'play', make:N([3, 5, 8]), text:p => `Earn ${p.n} stars`, val:r => r.stars },
+      { id:'three', cat:'play', tiers:[1, 2], make:(t, R) => ({ m:pk(MD, R) }), text:p => `Get 3 stars in ${MN[p.m]}`, goal:one, agg:'max', val:(r, p) => r.mode === p.m && r.stars === 3 ? 1 : 0 },
+    ];
+  })();
+  static TIER = { reward:[60, 110, 180], color:['#3ddc97', '#ffc94a', '#ff5a5f'], letter:['E', 'M', 'H'] };
+  static DK(d = new Date()) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  static rng(str) {
+    let h = 1779033703 ^ str.length; for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+    let a = h >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
   stageRef = React.createRef();
-  state = { screen:'home', paused:false, hud:null, pops:[], banners:[], result:null, profile:this.load(), shopTab:'darts', shopSel:null, gameCoins:0, hintSeen:false, loaded:false, coinDisp:0, lastMode:'classic' };
+  state = { missionTab:'daily', now:Date.now(), screen:'home', paused:false, hud:null, pops:[], banners:[], result:null, profile:this.load(), shopTab:'darts', shopSel:null, gameCoins:0, hintSeen:false, loaded:false, coinDisp:0, lastMode:'classic' };
   uid = 0;
 
   load() {
     const d = { coins:0, xp:0, level:1, skins:['rookie'], skin:'rookie', themes:['pub'], theme:'pub', best:{}, stars:{}, stats:{ bulls:0, triples:0, tons:0, wins301:0, clockWins:0, blitzBest:0 }, claimed:[], muted:false };
-    try { const p = JSON.parse(localStorage.getItem('polydarts_profile_v1')); if (p) return { ...d, ...p, stats:{ ...d.stats, ...(p.stats || {}) } }; } catch (e) {}
-    return d;
+    try { const p = JSON.parse(localStorage.getItem('polydarts_profile_v1')); if (p) return this.rollDaily({ ...d, ...p, stats:{ ...d.stats, ...(p.stats || {}) } }); } catch (e) {}
+    return this.rollDaily(d);
+  }
+  tplOf(id) { return Component.DT.find(t => t.id === id) || Component.DT[0]; }
+  goalOf(m) { const T = this.tplOf(m.tid); return T.goal ? T.goal(m.p) : m.p.n; }
+  genMission(t, tier, R) { return { tid:t.id, tier, p:t.make ? t.make(tier, R) : {}, progress:0, modes:[], claimed:false }; }
+  rollDaily(p) {
+    const today = Component.DK();
+    if (p.daily && p.daily.date === today && p.daily.list && p.daily.list.length === 3) return p;
+    const prev = p.daily && p.daily.list ? p.daily.list.map(m => m.tid) : [];
+    const R = Component.rng('pd-' + today), list = [];
+    [0, 1, 2].forEach(tier => {
+      const ok = relax => Component.DT.filter(t => (t.tiers || [0, 1, 2]).includes(tier) && !list.some(m => m.tid === t.id || this.tplOf(m.tid).cat === t.cat) && (relax || !prev.includes(t.id)));
+      let c = ok(false); if (!c.length) c = ok(true);
+      list.push(this.genMission(c[Math.floor(R() * c.length)], tier, R));
+    });
+    p.daily = { date:today, list, rerolled:false, chest:false };
+    return p;
+  }
+  streakInfo(p) {
+    const s = p.streak || { count:0, last:'' }, today = Component.DK(), yest = Component.DK(new Date(Date.now() - 864e5));
+    const cur = s.last === today || s.last === yest ? s.count : 0;
+    return { cur, next:s.last === today ? s.count : s.last === yest ? s.count + 1 : 1 };
+  }
+  chestReward(p) { return 120 + 30 * Math.min(5, this.streakInfo(p).next); }
+  tick() {
+    const p = this.state.profile;
+    if (!p.daily || p.daily.date !== Component.DK()) this.save(this.rollDaily(JSON.parse(JSON.stringify(p))));
+    if (this.state.screen === 'missions') this.setState({ now:Date.now() });
   }
   save(p) { try { localStorage.setItem('polydarts_profile_v1', JSON.stringify(p)); } catch (e) {} this.setState({ profile:p }); }
   skinById(id) { return Component.SKINS.find(s => s.id === id) || Component.SKINS[0]; }
@@ -308,10 +425,11 @@ class Component extends DCLogic {
       const p = this.state.profile;
       this.engine.setTheme(this.themeById(p.theme)); this.engine.setSkin(this.skinById(p.skin));
       this.applyOpts(); this.setState({ loaded:true });
+      this.ti = setInterval(() => this.tick(), 1000);
     } catch (e) { console.error(e); }
   }
   componentDidUpdate(pp) { if (pp.sound !== this.props.sound || pp.difficulty !== this.props.difficulty) this.applyOpts(); }
-  componentWillUnmount() { this.engine && this.engine.destroy(); clearInterval(this.ci); }
+  componentWillUnmount() { this.engine && this.engine.destroy(); clearInterval(this.ci); clearInterval(this.ti); }
 
   buzz(p) { if ((this.props.haptics ?? true) && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
   click() { this.engine && this.engine.sfx('click'); this.buzz(8); }
@@ -378,9 +496,23 @@ class Component extends DCLogic {
     coins += this.state.gameCoins; const xp = Math.round(coins * 1.5) + 20;
     p.coins += coins; p.xp += xp; let levelUp = false;
     while (p.xp >= this.xpNeed(p.level)) { p.xp -= this.xpNeed(p.level); p.level++; levelUp = true; }
+    this.rollDaily(p);
+    const rr = { ...r, acc:r.darts ? Math.round((r.darts - r.stats.misses) / r.darts * 100) : 0 }, ticks = [];
+    p.daily.list.forEach(m => {
+      const T = this.tplOf(m.tid), goal = this.goalOf(m), before = m.progress;
+      if (m.claimed || before >= goal) return;
+      if (T.agg === 'set') { if (!m.modes.includes(r.mode)) m.modes.push(r.mode); m.progress = m.modes.length; }
+      else { const v = T.val(rr, m.p) || 0; m.progress = T.agg === 'max' ? Math.max(m.progress, v) : m.progress + v; }
+      m.progress = Math.min(goal, m.progress);
+      if (m.progress > before) {
+        const done = m.progress >= goal;
+        ticks.push({ title:T.text(m.p), prog:done ? 'COMPLETE' : m.progress + '/' + goal, color:Component.TIER.color[m.tier], bg:done ? Component.TIER.color[m.tier] : '#15112b', fg:done ? '#15112b' : '#fff4e0', done });
+      }
+    });
+    if (ticks.some(x => x.done)) setTimeout(() => { this.banner('DAILY DONE', 'Claim it in Missions', 'win'); this.engine.sfx('ton'); this.buzz([30, 30, 60]); }, 1300);
     this.save(p);
     const acc = r.darts ? Math.round((r.darts - r.stats.misses) / r.darts * 100) : 0;
-    this.setState({ screen:'results', coinDisp:0, result:{ ...r, headline, big, bigLabel, coins, xp, levelUp, acc } });
+    this.setState({ screen:'results', coinDisp:0, result:{ ...r, headline, big, bigLabel, coins, xp, levelUp, acc, daily:ticks, hasDaily:ticks.length > 0 } });
     clearInterval(this.ci); let n = 0;
     this.ci = setInterval(() => { n++; this.setState({ coinDisp:Math.round(coins * Math.min(1, n / 25)) }); if (n % 4 === 0) this.engine.sfx('coin'); if (n >= 25) clearInterval(this.ci); }, 40);
     if (levelUp) setTimeout(() => { this.engine.sfx('win'); this.buzz([40, 40, 80]); }, 900);
@@ -391,6 +523,30 @@ class Component extends DCLogic {
     p.claimed.push(m.id); p.coins += m.reward; this.save(p);
     this.engine.sfx('coin'); setTimeout(() => this.engine.sfx('win'), 100); this.buzz([30, 30, 60]);
     this.banner('+' + m.reward, 'Mission complete', 'win');
+  }
+  claimDaily(i) {
+    const p = JSON.parse(JSON.stringify(this.state.profile)), m = p.daily.list[i];
+    if (m.claimed || m.progress < this.goalOf(m)) { this.click(); return; }
+    const rw = Component.TIER.reward[m.tier]; m.claimed = true; p.coins += rw; this.save(p);
+    this.engine.sfx('coin'); setTimeout(() => this.engine.sfx('win'), 100); this.buzz([30, 30, 60]);
+    this.banner('+' + rw, 'Daily mission', 'win');
+  }
+  rerollDaily(i) {
+    const p = JSON.parse(JSON.stringify(this.state.profile)), d = p.daily, m = d.list[i];
+    if (d.rerolled || m.claimed) return;
+    const R = Component.rng('pd-rr-' + d.date + '-' + i + '-' + Date.now()), others = d.list.filter((_, j) => j !== i);
+    const ok = relax => Component.DT.filter(t => (t.tiers || [0, 1, 2]).includes(m.tier) && !d.list.some(x => x.tid === t.id) && (relax || !others.some(x => this.tplOf(x.tid).cat === t.cat)));
+    let c = ok(false); if (!c.length) c = ok(true); if (!c.length) return;
+    d.list[i] = this.genMission(c[Math.floor(R() * c.length)], m.tier, R); d.rerolled = true;
+    this.save(p); this.engine.sfx('whoosh'); this.buzz(12);
+  }
+  openChest() {
+    const p = JSON.parse(JSON.stringify(this.state.profile)), d = p.daily;
+    if (d.chest || !d.list.every(m => m.progress >= this.goalOf(m))) { this.click(); return; }
+    const rw = this.chestReward(p), n = this.streakInfo(p).next;
+    p.streak = { count:n, last:Component.DK() }; d.chest = true; p.coins += rw; this.save(p);
+    this.engine.sfx('win'); setTimeout(() => this.engine.sfx('ton'), 300); this.buzz([40, 30, 40, 30, 90]);
+    this.banner('CHEST +' + rw, 'Streak ' + n + (n > 1 ? ' days' : ' day'), 'win');
   }
   pickShop(item) {
     this.click(); this.setState({ shopSel:item.id });
@@ -431,7 +587,19 @@ class Component extends DCLogic {
       const v = Math.min(m.goal, p.stats[m.key] || 0), claimed = p.claimed.includes(m.id), done = v >= m.goal;
       return { ...m, pct:(v / m.goal * 100) + '%', prog:v + '/' + m.goal, btn:claimed ? 'DONE' : '+' + m.reward, btnBg:claimed ? 'rgba(255,244,224,.08)' : done ? '#ffc94a' : '#2f2760', btnFg:claimed ? '#8a84a8' : done ? '#15112b' : '#c9c1f0', onClaim:() => this.claim(m) };
     });
-    const claimableCount = Component.MISSIONS.filter(m => !p.claimed.includes(m.id) && (p.stats[m.key] || 0) >= m.goal).length;
+    const dd = p.daily, TI = Component.TIER;
+    const dailies = dd.list.map((m, i) => {
+      const T = this.tplOf(m.tid), goal = this.goalOf(m), done = m.progress >= goal;
+      return { title:T.text(m.p), pct:(m.progress / goal * 100) + '%', prog:m.progress + '/' + goal, tierColor:TI.color[m.tier], tierLetter:TI.letter[m.tier],
+        btn:m.claimed ? 'DONE' : '+' + TI.reward[m.tier], btnBg:m.claimed ? 'rgba(255,244,224,.08)' : done ? '#ffc94a' : '#2f2760', btnFg:m.claimed ? '#8a84a8' : done ? '#15112b' : '#c9c1f0',
+        canReroll:!dd.rerolled && !done && !m.claimed, onClaim:() => this.claimDaily(i), onReroll:() => this.rerollDaily(i) };
+    });
+    const nDone = dd.list.filter(m => m.progress >= this.goalOf(m)).length, chestReady = nDone === 3 && !dd.chest;
+    const dClaim = dd.list.filter(m => !m.claimed && m.progress >= this.goalOf(m)).length + (chestReady ? 1 : 0);
+    const sk = this.streakInfo(p), mid = new Date(s.now); mid.setHours(24, 0, 0, 0);
+    const left = Math.max(0, Math.floor((mid - s.now) / 1000));
+    const resetIn = String(Math.floor(left / 3600)).padStart(2, '0') + ':' + String(Math.floor(left / 60) % 60).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0');
+    const claimableCount = Component.MISSIONS.filter(m => !p.claimed.includes(m.id) && (p.stats[m.key] || 0) >= m.goal).length + dClaim;
     // shop
     const darts = s.shopTab === 'darts', list = darts ? Component.SKINS : Component.THEMES, owned = darts ? p.skins : p.themes, eq = darts ? p.skin : p.theme;
     const shopItems = list.map(it => {
@@ -473,7 +641,20 @@ class Component extends DCLogic {
     const res = r ? { ...r, modeName:M.name.toUpperCase(), shadow:r.win || r.mode === 'blitz' ? '#ff5a5f' : '#7b5cff',
       stars:[0, 1, 2].map(i => ({ size:i === 1 ? '64px' : '50px', color:i < r.stars ? '#ffc94a' : 'rgba(255,244,224,.14)', delay:(0.35 + i * .22) + 's' })),
       stats:[{ k:'DARTS', v:r.darts }, { k:'BULLS', v:r.stats.bulls }, { k:'TRIPLES', v:r.stats.triples }, { k:'ACCURACY', v:r.acc + '%' }] } : {};
+    const dailyVals = {
+      dailies, resetIn, isDailyTab:s.missionTab === 'daily', isMileTab:s.missionTab !== 'daily',
+      tabDailyBg:s.missionTab === 'daily' ? '#3ddc97' : 'transparent', tabDailyFg:s.missionTab === 'daily' ? '#15112b' : '#c9c1f0',
+      tabMileBg:s.missionTab !== 'daily' ? '#3ddc97' : 'transparent', tabMileFg:s.missionTab !== 'daily' ? '#15112b' : '#c9c1f0',
+      tabDaily:() => { this.click(); this.setState({ missionTab:'daily' }); }, tabMile:() => { this.click(); this.setState({ missionTab:'mile' }); },
+      rerollText:dd.rerolled ? 'SWAP USED' : '1 FREE SWAP', rerollColor:dd.rerolled ? '#8a84a8' : '#ffc94a',
+      streakText:sk.cur ? 'STREAK ' + sk.cur : 'NO STREAK', streakColor:sk.cur ? '#ff5a5f' : '#8a84a8',
+      chestSub:dd.chest ? 'Opened · come back tomorrow' : 'Clear all 3 · +' + this.chestReward(p) + (sk.next > 1 ? ' with day ' + sk.next + ' streak' : ''),
+      chestPips:dd.list.map((m, i) => ({ color:i < nDone ? '#ffc94a' : 'rgba(255,244,224,.18)' })),
+      chestBtn:dd.chest ? 'DONE' : chestReady ? 'OPEN' : nDone + '/3', chestBtnBg:dd.chest ? 'rgba(255,244,224,.08)' : chestReady ? '#ffc94a' : '#15112b', chestBtnFg:dd.chest ? '#8a84a8' : chestReady ? '#15112b' : '#c9c1f0',
+      openChest:() => this.openChest(),
+    };
     return {
+      ...dailyVals,
       stageRef:this.stageRef, isHome:sc === 'home', isModes:sc === 'modes', isShop:sc === 'shop', isMissions:sc === 'missions',
       isGame:sc === 'game' || sc === 'results', isPaused:s.paused && sc === 'game', isResults:sc === 'results', isLoading:!s.loaded,
       level:p.level, coins:p.coins, xpPct:Math.round(p.xp / this.xpNeed(p.level) * 100) + '%', muteLabel:p.muted ? 'SFX OFF' : 'SFX ON',
