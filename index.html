@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#0b0a1a;overflow:hidden;overscroll-behavior:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+a{color:#ffc94a}a:hover{color:#fff4e0}
+@keyframes pd-float{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}14%{transform:translate(-50%,-70%) scale(1.2);opacity:1}28%{transform:translate(-50%,-75%) scale(1)}100%{transform:translate(-50%,-190%) scale(.9);opacity:0}}
+@keyframes pd-banner{0%{transform:translate(-50%,-50%) scale(2.4) rotate(-8deg);opacity:0}16%{transform:translate(-50%,-50%) scale(.9) rotate(-4deg);opacity:1}26%{transform:translate(-50%,-50%) scale(1.05) rotate(-4deg)}80%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(.85) rotate(-4deg)}}
+@keyframes pd-up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pd-fade{from{opacity:0}to{opacity:1}}
+@keyframes pd-star{0%{transform:scale(0) rotate(-120deg);opacity:0}60%{transform:scale(1.4) rotate(12deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes pd-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes pd-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pd-pop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;display:flex;justify-content:center;background:#0b0a1a;font-family:'Chakra Petch',sans-serif;color:#fff4e0">
+  <div style="position:relative;width:100%;max-width:460px;height:100%;overflow:hidden;background:#1c1530">
+    <div ref="{{ stageRef }}" style="position:absolute;inset:0"></div>
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Home" style="position:absolute;inset:0;display:flex;flex-direction:column;pointer-events:none;animation:pd-fade .4s ease both">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 16px 0;pointer-events:auto">
+          <div style="width:46px;height:46px;background:#7b5cff;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:18px;color:#fff4e0">{{ level }}</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;max-width:130px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.14em;color:#c9c1f0">LEVEL {{ level }}</div>
+            <div style="height:8px;background:rgba(255,244,224,.14);clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"><div style="height:100%;width:{{ xpPct }};background:#3ddc97;transition:width .8s"></div></div>
+          </div>
+          <div style="flex:1"></div>
+          <div onClick="{{ toggleMute }}" style="height:36px;padding:0 12px;display:flex;align-items:center;background:rgba(21,17,43,.7);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);font-size:12px;font-weight:700;letter-spacing:.12em;cursor:pointer">{{ muteLabel }}</div>
+          <div style="height:36px;padding:0 14px 0 10px;display:flex;align-items:center;gap:8px;background:rgba(21,17,43,.7);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)">
+            <div style="width:16px;height:18px;background:#ffc94a;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)"></div>
+            <div style="font-family:Bungee;font-size:16px;color:#ffc94a">{{ coins }}</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px">
+          <div style="font-family:Bungee;font-size:62px;line-height:.92;color:#fff4e0;text-shadow:4px 4px 0 #ff5a5f,8px 8px 0 #7b5cff;letter-spacing:.02em">POLY<br>DARTS</div>
+          <div style="margin-top:14px;font-size:13px;font-weight:700;letter-spacing:.28em;color:#c9c1f0">ONE THUMB · ZERO MERCY</div>
+        </div>
+        <div style="flex:1"></div>
+        <div style="padding:60px 18px 26px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(to bottom,rgba(21,17,43,0),rgba(21,17,43,.9) 38%);pointer-events:auto">
+          <div onClick="{{ goModes }}" style="height:76px;display:flex;align-items:center;justify-content:center;gap:14px;background:#ff5a5f;color:#15112b;font-family:Bungee;font-size:32px;clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);box-shadow:inset 0 -7px 0 rgba(0,0,0,.22);cursor:pointer;animation:pd-pulse 2.4s ease-in-out infinite" style-active="transform:translateY(3px);box-shadow:inset 0 -3px 0 rgba(0,0,0,.22)">PLAY</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div onClick="{{ goShop }}" style="height:60px;display:flex;align-items:center;justify-content:center;background:#2f2760;font-family:Bungee;font-size:18px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer" style-active="transform:translateY(3px)">LOCKER</div>
+            <div onClick="{{ goMissions }}" style="position:relative;height:60px;display:flex;align-items:center;justify-content:center;gap:8px;background:#2f2760;font-family:Bungee;font-size:18px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer" style-active="transform:translateY(3px)">
+              <span>MISSIONS</span>
+              <sc-if value="{{ hasClaimable }}" hint-placeholder-val="{{ false }}">
+                <span style="min-width:24px;height:24px;padding:0 6px;display:flex;align-items:center;justify-content:center;background:#ffc94a;color:#15112b;font-size:13px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)">{{ claimableCount }}</span>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isModes }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Modes" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to bottom,rgba(21,17,43,.1),rgba(21,17,43,.85) 45%)">
+        <div style="padding:0 18px 26px;display:flex;flex-direction:column;gap:12px;animation:pd-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="font-family:Bungee;font-size:30px;text-shadow:3px 3px 0 #7b5cff">PICK A GAME</div>
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+            <div onClick="{{ m.onPick }}" style="display:flex;align-items:center;gap:14px;padding:14px;background:#241e4a;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer" style-active="transform:translateY(3px)">
+              <div style="flex:none;width:64px;height:64px;background:{{ m.color }};clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:17px;color:#15112b">{{ m.glyph }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                <div style="font-family:Bungee;font-size:19px">{{ m.name }}</div>
+                <div style="font-size:14px;font-weight:500;color:#c9c1f0;text-wrap:pretty">{{ m.desc }}</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+                  <div style="display:flex;gap:3px">
+                    <sc-for list="{{ m.stars }}" as="s" hint-placeholder-count="3">
+                      <div style="width:15px;height:15px;background:{{ s.color }};clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)"></div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#ffc94a">{{ m.best }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          <div onClick="{{ goHome }}" style="height:54px;display:flex;align-items:center;justify-content:center;background:rgba(47,39,96,.8);font-family:Bungee;font-size:16px;letter-spacing:.06em;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">BACK</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Locker" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0">
+          <div style="font-family:Bungee;font-size:28px;text-shadow:3px 3px 0 #ff5a5f">LOCKER</div>
+          <div style="height:36px;padding:0 14px 0 10px;display:flex;align-items:center;gap:8px;background:rgba(21,17,43,.7);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)">
+            <div style="width:16px;height:18px;background:#ffc94a;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)"></div>
+            <div style="font-family:Bungee;font-size:16px;color:#ffc94a">{{ coins }}</div>
+          </div>
+        </div>
+        <div style="pointer-events:auto;background:#241e4a;clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 22px,100% 100%,0 100%,0 22px);padding:20px 18px 24px;display:flex;flex-direction:column;gap:14px;animation:pd-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#15112b;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)">
+            <div onClick="{{ tabDarts }}" style="height:40px;display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:15px;background:{{ tabDartsBg }};color:{{ tabDartsFg }};clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">DARTS</div>
+            <div onClick="{{ tabBoards }}" style="height:40px;display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:15px;background:{{ tabBoardsBg }};color:{{ tabBoardsFg }};clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">BOARDS</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <sc-for list="{{ shopItems }}" as="it" hint-placeholder-count="6">
+              <div onClick="{{ it.onPick }}" style="position:relative;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;background:{{ it.cardBg }};clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);cursor:pointer">
+                <div style="width:52px;height:52px;background:{{ it.swatch }};clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)"></div>
+                <div style="font-size:13px;font-weight:700;text-align:center;line-height:1.1;color:{{ it.nameColor }}">{{ it.name }}</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:{{ it.tagColor }}">{{ it.tag }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ shopAction }}" style="height:62px;display:flex;align-items:center;justify-content:center;background:{{ actionBg }};color:{{ actionFg }};font-family:Bungee;font-size:20px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.22);cursor:pointer" style-active="transform:translateY(3px)">{{ actionLabel }}</div>
+          <div onClick="{{ goHome }}" style="height:50px;display:flex;align-items:center;justify-content:center;background:#2f2760;font-family:Bungee;font-size:15px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">BACK</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMissions }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Missions" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(to bottom,rgba(21,17,43,.2),rgba(21,17,43,.9) 40%)">
+        <div style="padding:0 18px 26px;display:flex;flex-direction:column;gap:10px;animation:pd-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="font-family:Bungee;font-size:30px;text-shadow:3px 3px 0 #3ddc97">MISSIONS</div>
+          <sc-for list="{{ missions }}" as="ms" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;background:#241e4a;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                <div style="font-size:15px;font-weight:700">{{ ms.title }}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="flex:1;height:7px;background:rgba(255,244,224,.12)"><div style="height:100%;width:{{ ms.pct }};background:#3ddc97"></div></div>
+                  <div style="font-size:12px;font-weight:700;color:#c9c1f0;min-width:52px;text-align:right">{{ ms.prog }}</div>
+                </div>
+              </div>
+              <div onClick="{{ ms.onClaim }}" style="flex:none;width:84px;height:44px;display:flex;align-items:center;justify-content:center;gap:5px;background:{{ ms.btnBg }};color:{{ ms.btnFg }};font-family:Bungee;font-size:14px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);cursor:pointer">{{ ms.btn }}</div>
+            </div>
+          </sc-for>
+          <div onClick="{{ goHome }}" style="height:54px;display:flex;align-items:center;justify-content:center;background:rgba(47,39,96,.8);font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">BACK</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGame }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Game" style="position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px 0;background:linear-gradient(to bottom,rgba(21,17,43,.75),rgba(21,17,43,0))">
+          <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px">
+            <div onClick="{{ pause }}" style="pointer-events:auto;width:46px;height:46px;background:#2f2760;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer">
+              <div style="width:5px;height:16px;background:#fff4e0"></div><div style="width:5px;height:16px;background:#fff4e0"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;line-height:1">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.22em;color:#c9c1f0">{{ hudLabel }}</div>
+              <div style="font-family:Bungee;font-size:42px;color:#fff4e0;text-shadow:3px 3px 0 {{ hudShadow }}">{{ hudValue }}</div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:.14em;color:#ffc94a;margin-top:2px">{{ hudSub }}</div>
+            </div>
+            <div style="height:34px;padding:0 12px 0 9px;display:flex;align-items:center;gap:7px;background:rgba(21,17,43,.7);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)">
+              <div style="width:13px;height:15px;background:#ffc94a;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)"></div>
+              <div style="font-family:Bungee;font-size:14px;color:#ffc94a">+{{ gameCoins }}</div>
+            </div>
+          </div>
+          <sc-if value="{{ isBlitz }}" hint-placeholder-val="{{ false }}">
+            <div style="height:6px;background:rgba(255,244,224,.14);clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)"><div style="height:100%;width:{{ timePct }};background:{{ timeColor }}"></div></div>
+          </sc-if>
+          <sc-if value="{{ isClock }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(21,minmax(0,1fr));gap:3px">
+              <sc-for list="{{ clockTicks }}" as="tk" hint-placeholder-count="21">
+                <div style="height:8px;background:{{ tk.bg }};clip-path:polygon(2px 0,100% 0,calc(100% - 2px) 100%,0 100%)"></div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 16px 22px">
+          <sc-if value="{{ showHint }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 16px;background:rgba(21,17,43,.8);clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);animation:pd-bob 1.6s ease-in-out infinite">
+              <div style="font-family:Bungee;font-size:15px;letter-spacing:.04em">HOLD · DRAG · RELEASE</div>
+              <div style="font-size:13px;font-weight:600;color:#c9c1f0">Keep still until the ring turns <span style="color:#3ddc97">green</span></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showMult }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:6px 16px;background:#ffc94a;color:#15112b;font-family:Bungee;font-size:20px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);animation:pd-pulse .8s ease-in-out infinite">{{ multText }}</div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(3,76px);gap:8px">
+            <sc-for list="{{ turnSlots }}" as="sl" hint-placeholder-count="3">
+              <div style="height:48px;display:flex;align-items:center;justify-content:center;background:{{ sl.bg }};color:{{ sl.fg }};font-family:Bungee;font-size:17px;clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)">
+                <sc-if value="{{ sl.empty }}" hint-placeholder-val="{{ true }}">
+                  <div style="width:14px;height:22px;background:{{ sl.dot }};clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)"></div>
+                </sc-if>
+                <sc-if value="{{ sl.filled }}" hint-placeholder-val="{{ false }}"><span>{{ sl.text }}</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPaused }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Pause" style="position:absolute;inset:0;z-index:40;background:rgba(11,10,26,.72);display:flex;flex-direction:column;justify-content:flex-end;animation:pd-fade .2s both">
+        <div style="padding:0 18px 26px;display:flex;flex-direction:column;gap:12px;animation:pd-up .3s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="font-family:Bungee;font-size:40px;text-align:center;text-shadow:3px 3px 0 #7b5cff;margin-bottom:12px">PAUSED</div>
+          <div onClick="{{ resume }}" style="height:70px;display:flex;align-items:center;justify-content:center;background:#3ddc97;color:#15112b;font-family:Bungee;font-size:24px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.2);cursor:pointer">RESUME</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div onClick="{{ restart }}" style="height:56px;display:flex;align-items:center;justify-content:center;background:#2f2760;font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">RESTART</div>
+            <div onClick="{{ quit }}" style="height:56px;display:flex;align-items:center;justify-content:center;background:#2f2760;font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">QUIT</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isResults }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Results" style="position:absolute;inset:0;z-index:40;background:rgba(11,10,26,.55);display:flex;flex-direction:column;justify-content:flex-end;animation:pd-fade .3s both">
+        <div style="background:#241e4a;clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 22px,100% 100%,0 100%,0 22px);padding:26px 18px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:pd-up .45s cubic-bezier(.2,.9,.3,1.2) both">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.24em;color:#c9c1f0">{{ res.modeName }}</div>
+          <div style="font-family:Bungee;font-size:42px;line-height:1;text-align:center;text-shadow:3px 3px 0 {{ res.shadow }}">{{ res.headline }}</div>
+          <div style="display:flex;gap:10px;align-items:flex-end;height:64px">
+            <sc-for list="{{ res.stars }}" as="st" hint-placeholder-count="3">
+              <div style="width:{{ st.size }};height:{{ st.size }};background:{{ st.color }};clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);animation:pd-star .55s cubic-bezier(.3,1.6,.5,1) both;animation-delay:{{ st.delay }}"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;line-height:1">
+            <div style="font-family:Bungee;font-size:52px;color:#ffc94a">{{ res.big }}</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.2em;color:#c9c1f0;margin-top:4px">{{ res.bigLabel }}</div>
+          </div>
+          <div style="width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+            <sc-for list="{{ res.stats }}" as="sx" hint-placeholder-count="4">
+              <div style="padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#15112b;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)">
+                <div style="font-family:Bungee;font-size:20px">{{ sx.v }}</div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.14em;color:#c9c1f0">{{ sx.k }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:#15112b;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)">
+            <div style="width:22px;height:25px;background:#ffc94a;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)"></div>
+            <div style="font-family:Bungee;font-size:24px;color:#ffc94a;min-width:70px">+{{ coinDisp }}</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.14em;color:#c9c1f0"><span>LVL {{ level }}</span><span>+{{ res.xp }} XP</span></div>
+              <div style="height:8px;background:rgba(255,244,224,.14)"><div style="height:100%;width:{{ xpPct }};background:#3ddc97;transition:width 1s .4s"></div></div>
+            </div>
+          </div>
+          <sc-if value="{{ res.levelUp }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 18px;background:#7b5cff;font-family:Bungee;font-size:18px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);animation:pd-pop .6s .9s both">LEVEL UP · {{ level }}</div>
+          </sc-if>
+          <div style="width:100%;display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:4px">
+            <div onClick="{{ quit }}" style="height:64px;display:flex;align-items:center;justify-content:center;background:#2f2760;font-family:Bungee;font-size:16px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);cursor:pointer">MENU</div>
+            <div onClick="{{ restart }}" style="height:64px;display:flex;align-items:center;justify-content:center;background:#ff5a5f;color:#15112b;font-family:Bungee;font-size:24px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.22);cursor:pointer" style-active="transform:translateY(3px)">AGAIN</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#1c1530;font-family:Bungee;font-size:18px;letter-spacing:.1em;color:#c9c1f0">LOADING BOARD…</div>
+    </sc-if>
+    {{ fxLayer }}
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;difficulty&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Chill&quot;,&quot;Normal&quot;,&quot;Pro&quot;],&quot;default&quot;:&quot;Normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Gameplay&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;haptics&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Feel&quot;}}">
+class Component extends DCLogic {
+  static SKINS = [
+    { id:'rookie', name:'Rookie', price:0, barrel:'#c9d1e3', flight:'#ff5a5f', tip:'#e8ecf5' },
+    { id:'viper', name:'Mint Viper', price:150, barrel:'#2b2d42', flight:'#3ddc97', tip:'#d0d6e2' },
+    { id:'solar', name:'Solar', price:300, barrel:'#ffc94a', flight:'#ff7a1a', tip:'#fff4e0' },
+    { id:'uv', name:'Ultraviolet', price:500, barrel:'#7b5cff', flight:'#ff4fd8', tip:'#e6dcff' },
+    { id:'glacier', name:'Glacier', price:800, barrel:'#e9f6ff', flight:'#4cc9ff', tip:'#ffffff' },
+    { id:'obsidian', name:'Obsidian', price:1200, barrel:'#1b1b22', flight:'#ffcf33', tip:'#ffcf33' },
+  ];
+  static THEMES = [
+    { id:'pub', name:'Night Pub', price:0, bg:'#1c1530', wall:'#2e2350', backing:'#17121f', sA:'#f4e7cb', sB:'#27233a', rA:'#ef4b4b', rB:'#1faa73', obull:'#1faa73', bull:'#ef4b4b', num:'#fff4e0', shapes:['#ff5a5f','#3ddc97','#ffc94a','#7b5cff'] },
+    { id:'neon', name:'Neon Grid', price:400, bg:'#070a1f', wall:'#10183d', backing:'#05060f', sA:'#23307a', sB:'#0d1236', rA:'#ff3fd0', rB:'#26f0c8', obull:'#26f0c8', bull:'#ff3fd0', num:'#b8f7ff', shapes:['#ff3fd0','#26f0c8','#5a7dff','#b8f7ff'] },
+    { id:'sunset', name:'Sunset Mesa', price:600, bg:'#2a0f2e', wall:'#5a1f4a', backing:'#2a0b24', sA:'#ffe0bd', sB:'#6b2a55', rA:'#ff6433', rB:'#ffb331', obull:'#ffb331', bull:'#ff6433', num:'#fff0dd', shapes:['#ff6433','#ffb331','#ff8fa3','#ffe0bd'] },
+    { id:'jade', name:'Jade Temple', price:900, bg:'#0b1f1c', wall:'#14392f', backing:'#081411', sA:'#e7f2d8', sB:'#1d3b33', rA:'#e8b04a', rB:'#2fb58f', obull:'#2fb58f', bull:'#e8b04a', num:'#e7f2d8', shapes:['#2fb58f','#e8b04a','#9fe3c1','#5b8f7a'] },
+  ];
+  static MODES = [
+    { id:'classic', name:'301 Classic', glyph:'301', color:'#ff5a5f', desc:'Count down to exactly zero. Overshoot and you bust.' },
+    { id:'clock', name:'Around the Clock', glyph:'1→20', color:'#3ddc97', desc:'Hit 1 to 20, then bull. Doubles and triples skip ahead.' },
+    { id:'blitz', name:'Blitz 45', glyph:'45s', color:'#ffc94a', desc:'Score fast. Chain hits for combos, hit the hot number for time.' },
+  ];
+  static MISSIONS = [
+    { id:'bulls5', title:'Hit 5 bulls', key:'bulls', goal:5, reward:100 },
+    { id:'trip20', title:'Land 20 triples', key:'triples', goal:20, reward:150 },
+    { id:'ton', title:'Score 100+ in one turn', key:'tons', goal:1, reward:80 },
+    { id:'win301', title:'Check out a game of 301', key:'wins301', goal:1, reward:120 },
+    { id:'clock', title:'Finish Around the Clock', key:'clockWins', goal:1, reward:120 },
+    { id:'blitz900', title:'Score 900 in Blitz', key:'blitzBest', goal:900, reward:200 },
+  ];
+  stageRef = React.createRef();
+  state = { screen:'home', paused:false, hud:null, pops:[], banners:[], result:null, profile:this.load(), shopTab:'darts', shopSel:null, gameCoins:0, hintSeen:false, loaded:false, coinDisp:0, lastMode:'classic' };
+  uid = 0;
+
+  load() {
+    const d = { coins:0, xp:0, level:1, skins:['rookie'], skin:'rookie', themes:['pub'], theme:'pub', best:{}, stars:{}, stats:{ bulls:0, triples:0, tons:0, wins301:0, clockWins:0, blitzBest:0 }, claimed:[], muted:false };
+    try { const p = JSON.parse(localStorage.getItem('polydarts_profile_v1')); if (p) return { ...d, ...p, stats:{ ...d.stats, ...(p.stats || {}) } }; } catch (e) {}
+    return d;
+  }
+  save(p) { try { localStorage.setItem('polydarts_profile_v1', JSON.stringify(p)); } catch (e) {} this.setState({ profile:p }); }
+  skinById(id) { return Component.SKINS.find(s => s.id === id) || Component.SKINS[0]; }
+  themeById(id) { return Component.THEMES.find(s => s.id === id) || Component.THEMES[0]; }
+  xpNeed(l) { return 150 + (l - 1) * 100; }
+  diff() { return { Chill:.6, Normal:1, Pro:1.45 }[this.props.difficulty ?? 'Normal'] || 1; }
+  applyOpts() { this.engine && this.engine.setOptions({ sound:(this.props.sound ?? true) && !this.state.profile.muted, difficulty:this.diff() }); }
+
+  async componentDidMount() {
+    try {
+      const mod = await import(new URL('polydarts-engine.js', document.baseURI).href);
+      this.engine = mod.createGame(this.stageRef.current, {
+        onHud:h => this.setState({ hud:h }), onHit:h => this.onHit(h), onTurn:t => this.onTurn(t),
+        onBanner:(a, b, c) => this.banner(a, b, c), onEnd:r => this.onEnd(r), onAim:() => !this.state.hintSeen && this.setState({ hintSeen:true }),
+      });
+      const p = this.state.profile;
+      this.engine.setTheme(this.themeById(p.theme)); this.engine.setSkin(this.skinById(p.skin));
+      this.applyOpts(); this.setState({ loaded:true });
+    } catch (e) { console.error(e); }
+  }
+  componentDidUpdate(pp) { if (pp.sound !== this.props.sound || pp.difficulty !== this.props.difficulty) this.applyOpts(); }
+  componentWillUnmount() { this.engine && this.engine.destroy(); clearInterval(this.ci); }
+
+  buzz(p) { if ((this.props.haptics ?? true) && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
+  click() { this.engine && this.engine.sfx('click'); this.buzz(8); }
+  go(screen) {
+    this.click();
+    if (this.engine) {
+      this.engine.shop(screen === 'shop');
+      if (screen !== 'shop') this.engine.setTheme(this.themeById(this.state.profile.theme));
+      if (screen === 'shop') this.engine.setSkin(this.skinById(this.state.profile.skin));
+    }
+    this.setState({ screen, shopSel:screen === 'shop' ? this.state.profile.skin : this.state.shopSel, shopTab:screen === 'shop' ? 'darts' : this.state.shopTab });
+  }
+  startMode(id) {
+    if (!this.engine) return;
+    this.click(); this.engine.start(id);
+    this.setState({ screen:'game', paused:false, gameCoins:0, result:null, hud:null, lastMode:id, pops:[], banners:[] });
+    const m = Component.MODES.find(x => x.id === id);
+    setTimeout(() => this.banner(m.name.toUpperCase(), id === 'classic' ? '12 rounds · exact zero' : id === 'clock' ? '120 seconds' : 'Board starts spinning…', 'info'), 150);
+  }
+
+  pop(o) {
+    const id = ++this.uid; this.setState(s => ({ pops:[...s.pops, { id, ...o }] }));
+    setTimeout(() => this.setState(s => ({ pops:s.pops.filter(p => p.id !== id) })), 1200);
+  }
+  banner(text, sub, tone) {
+    const id = ++this.uid; this.setState(s => ({ banners:[...s.banners.slice(-1), { id, text, sub, tone }] }));
+    setTimeout(() => this.setState(s => ({ banners:s.banners.filter(b => b.id !== id) })), 1700);
+  }
+  onHit(h) {
+    const C = { bull:['BULLSEYE!', '#ffc94a', 44], obull:['BULL', '#3ddc97', 34], triple:['TRIPLE ' + h.n, '#ff5a5f', 36], double:['DOUBLE ' + h.n, '#3ddc97', 32], single:['' + h.n, '#fff4e0', 32], miss:['MISS', '#8a84a8', 26], wall:['MISS', '#8a84a8', 26] }[h.ring];
+    let color = C[1]; if (h.mode === 'clock' && !h.good && h.score) color = '#8a84a8';
+    let sub = h.extra || (h.mode === 'blitz' && h.pts ? '+' + h.pts : '');
+    if (h.steady && h.score) sub = (sub ? sub + ' · ' : '') + 'STEADY';
+    this.pop({ x:h.sx, y:h.sy - 30, text:C[0], sub, color, size:C[2] });
+    const coins = h.ring === 'bull' ? 5 : h.ring === 'obull' ? 2 : h.ring === 'triple' ? 3 : h.ring === 'double' ? 1 : 0;
+    if (coins) { this.setState(s => ({ gameCoins:s.gameCoins + coins })); setTimeout(() => this.engine.sfx('coin'), 180); }
+    this.buzz(h.ring === 'bull' ? [30, 40, 60] : h.ring === 'triple' ? [20, 30, 30] : h.score ? 14 : 6);
+    if (h.ring === 'bull') this.banner('BULLSEYE', '+5 coins', 'win');
+  }
+  onTurn(t) {
+    if (t === 180) { this.banner('ONE-EIGHTY!', 'Maximum', 'win'); this.buzz([40, 30, 40, 30, 80]); }
+    else if (t >= 100) { this.banner('TON ' + t, 'Monster turn', 'win'); this.buzz([30, 30, 50]); }
+    else if (t >= 60) this.banner(t + '', 'Nice turn', 'info');
+  }
+  onEnd(r) {
+    const p = JSON.parse(JSON.stringify(this.state.profile));
+    const st = p.stats; st.bulls += r.stats.bulls; st.triples += r.stats.triples; st.tons += r.stats.tons;
+    let big, bigLabel, headline, coins, better = false;
+    if (r.mode === 'classic') {
+      if (r.win) { st.wins301++; better = !p.best.classic || r.darts < p.best.classic; if (better) p.best.classic = r.darts; }
+      headline = r.win ? 'CHECKOUT!' : 'OUT OF ROUNDS'; big = r.win ? r.darts : r.remaining; bigLabel = r.win ? 'DARTS TO FINISH' : 'LEFT ON THE BOARD';
+      coins = r.win ? 40 + r.stars * 30 : 12;
+    } else if (r.mode === 'clock') {
+      if (r.win) { st.clockWins++; better = !p.best.clock || r.darts < p.best.clock; if (better) p.best.clock = r.darts; }
+      headline = r.win ? 'FULL CLOCK!' : 'TIME UP'; big = r.win ? r.darts : (r.target === 25 ? 'BULL' : r.target); bigLabel = r.win ? 'DARTS USED' : 'REACHED';
+      coins = r.win ? 40 + r.stars * 30 : 10 + (r.target === 25 ? 21 : r.target);
+    } else {
+      st.blitzBest = Math.max(st.blitzBest, r.score); better = !p.best.blitz || r.score > p.best.blitz; if (better) p.best.blitz = r.score;
+      headline = r.stars >= 2 ? 'ON FIRE!' : r.stars ? 'TIME!' : 'WARM-UP'; big = r.score; bigLabel = 'POINTS';
+      coins = Math.floor(r.score / 12) + r.stars * 20;
+    }
+    if (better) bigLabel = 'NEW BEST · ' + bigLabel;
+    p.stars[r.mode] = Math.max(p.stars[r.mode] || 0, r.stars);
+    coins += this.state.gameCoins; const xp = Math.round(coins * 1.5) + 20;
+    p.coins += coins; p.xp += xp; let levelUp = false;
+    while (p.xp >= this.xpNeed(p.level)) { p.xp -= this.xpNeed(p.level); p.level++; levelUp = true; }
+    this.save(p);
+    const acc = r.darts ? Math.round((r.darts - r.stats.misses) / r.darts * 100) : 0;
+    this.setState({ screen:'results', coinDisp:0, result:{ ...r, headline, big, bigLabel, coins, xp, levelUp, acc } });
+    clearInterval(this.ci); let n = 0;
+    this.ci = setInterval(() => { n++; this.setState({ coinDisp:Math.round(coins * Math.min(1, n / 25)) }); if (n % 4 === 0) this.engine.sfx('coin'); if (n >= 25) clearInterval(this.ci); }, 40);
+    if (levelUp) setTimeout(() => { this.engine.sfx('win'); this.buzz([40, 40, 80]); }, 900);
+  }
+  claim(m) {
+    const p = JSON.parse(JSON.stringify(this.state.profile));
+    if (p.claimed.includes(m.id) || (p.stats[m.key] || 0) < m.goal) return;
+    p.claimed.push(m.id); p.coins += m.reward; this.save(p);
+    this.engine.sfx('coin'); setTimeout(() => this.engine.sfx('win'), 100); this.buzz([30, 30, 60]);
+    this.banner('+' + m.reward, 'Mission complete', 'win');
+  }
+  pickShop(item) {
+    this.click(); this.setState({ shopSel:item.id });
+    if (this.state.shopTab === 'darts') this.engine.setSkin(item); else this.engine.setTheme(item);
+  }
+  shopAct() {
+    const darts = this.state.shopTab === 'darts', list = darts ? Component.SKINS : Component.THEMES;
+    const item = list.find(i => i.id === this.state.shopSel); if (!item) return;
+    const p = JSON.parse(JSON.stringify(this.state.profile)), owned = darts ? p.skins : p.themes;
+    if (!owned.includes(item.id)) {
+      if (p.coins < item.price) { this.engine.sfx('miss'); this.buzz([10, 40, 10]); return; }
+      p.coins -= item.price; owned.push(item.id); this.engine.sfx('coin'); this.banner('UNLOCKED', item.name, 'win'); this.buzz([20, 30, 50]);
+    } else this.click();
+    if (darts) p.skin = item.id; else p.theme = item.id;
+    this.save(p);
+  }
+
+  fx() {
+    const kids = this.state.pops.map(p => React.createElement('div', { key:p.id, style:{ position:'absolute', left:p.x, top:p.y, transform:'translate(-50%,-50%)', animation:'pd-float 1.2s cubic-bezier(.2,.8,.2,1) forwards', textAlign:'center', whiteSpace:'nowrap' } },
+      React.createElement('div', { style:{ fontFamily:'Bungee', fontSize:p.size, color:p.color, lineHeight:1, textShadow:'3px 3px 0 #15112b' } }, p.text),
+      p.sub ? React.createElement('div', { style:{ fontFamily:'Chakra Petch', fontWeight:700, fontSize:15, letterSpacing:'.12em', color:'#fff4e0', marginTop:4, textShadow:'2px 2px 0 #15112b' } }, p.sub) : null));
+    this.state.banners.forEach(b => {
+      const bg = b.tone === 'bad' ? '#ff5a5f' : b.tone === 'win' ? '#ffc94a' : '#7b5cff';
+      kids.push(React.createElement('div', { key:'b' + b.id, style:{ position:'absolute', left:'50%', top:'54%', transform:'translate(-50%,-50%)', animation:'pd-banner 1.7s cubic-bezier(.2,.9,.3,1) forwards', display:'flex', flexDirection:'column', alignItems:'center' } },
+        React.createElement('div', { style:{ background:bg, color:b.tone === 'info' ? '#fff4e0' : '#15112b', fontFamily:'Bungee', fontSize:40, padding:'10px 24px', whiteSpace:'nowrap', clipPath:'polygon(16px 0,100% 0,calc(100% - 16px) 100%,0 100%)' } }, b.text),
+        b.sub ? React.createElement('div', { style:{ background:'#15112b', color:'#fff4e0', fontFamily:'Chakra Petch', fontWeight:700, letterSpacing:'.16em', fontSize:14, padding:'6px 16px', marginTop:-2, textTransform:'uppercase', clipPath:'polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)' } }, b.sub) : null));
+    });
+    return React.createElement('div', { style:{ position:'absolute', inset:0, pointerEvents:'none', zIndex:45, overflow:'hidden' } }, kids);
+  }
+
+  renderVals() {
+    const s = this.state, p = s.profile, h = s.hud, sc = s.screen;
+    const fmt = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+    const starArr = (n, on = '#ffc94a') => [0, 1, 2].map(i => ({ color:i < n ? on : 'rgba(255,244,224,.18)' }));
+    const modes = Component.MODES.map(m => ({ ...m, stars:starArr(p.stars[m.id] || 0),
+      best:p.best[m.id] ? (m.id === 'blitz' ? 'BEST ' + p.best[m.id] : 'BEST ' + p.best[m.id] + ' DARTS') : 'NOT PLAYED', onPick:() => this.startMode(m.id) }));
+    const missions = Component.MISSIONS.map(m => {
+      const v = Math.min(m.goal, p.stats[m.key] || 0), claimed = p.claimed.includes(m.id), done = v >= m.goal;
+      return { ...m, pct:(v / m.goal * 100) + '%', prog:v + '/' + m.goal, btn:claimed ? 'DONE' : '+' + m.reward, btnBg:claimed ? 'rgba(255,244,224,.08)' : done ? '#ffc94a' : '#2f2760', btnFg:claimed ? '#8a84a8' : done ? '#15112b' : '#c9c1f0', onClaim:() => this.claim(m) };
+    });
+    const claimableCount = Component.MISSIONS.filter(m => !p.claimed.includes(m.id) && (p.stats[m.key] || 0) >= m.goal).length;
+    // shop
+    const darts = s.shopTab === 'darts', list = darts ? Component.SKINS : Component.THEMES, owned = darts ? p.skins : p.themes, eq = darts ? p.skin : p.theme;
+    const shopItems = list.map(it => {
+      const own = owned.includes(it.id), sel = s.shopSel === it.id;
+      return { ...it, swatch:darts ? `linear-gradient(135deg, ${it.barrel} 0 50%, ${it.flight} 50% 100%)` : `conic-gradient(${it.rA} 0 25%, ${it.sA} 0 50%, ${it.rB} 0 75%, ${it.sB} 0)`,
+        cardBg:sel ? '#3a3175' : '#15112b', nameColor:sel ? '#fff4e0' : '#c9c1f0',
+        tag:eq === it.id ? 'EQUIPPED' : own ? 'OWNED' : '◆ ' + it.price, tagColor:eq === it.id ? '#3ddc97' : own ? '#c9c1f0' : '#ffc94a', onPick:() => this.pickShop(it) };
+    });
+    const selItem = list.find(i => i.id === s.shopSel) || list[0];
+    let actionLabel = 'EQUIPPED', actionBg = 'rgba(255,244,224,.1)', actionFg = '#8a84a8';
+    if (selItem && eq !== selItem.id) {
+      if (owned.includes(selItem.id)) { actionLabel = 'EQUIP'; actionBg = '#3ddc97'; actionFg = '#15112b'; }
+      else if (p.coins >= selItem.price) { actionLabel = 'BUY · ' + selItem.price; actionBg = '#ffc94a'; actionFg = '#15112b'; }
+      else { actionLabel = 'NEED ' + (selItem.price - p.coins) + ' MORE'; }
+    }
+    // hud
+    let hudLabel = '', hudValue = '', hudSub = '', hudShadow = '#ff5a5f', turnSlots = [], clockTicks = [], timePct = '100%', timeColor = '#ffc94a', showMult = false, multText = '';
+    if (h) {
+      if (h.mode === 'classic') {
+        hudLabel = 'REMAINING'; hudValue = h.remaining; const r = h.remaining;
+        hudSub = 'ROUND ' + h.round + '/12' + (r === 50 ? ' · OUT: BULL' : r <= 40 && r % 2 === 0 ? ' · OUT: D' + r / 2 : r <= 20 ? ' · OUT: ' + r : '');
+      } else if (h.mode === 'clock') {
+        hudLabel = 'TARGET'; hudValue = h.target === 25 ? 'BULL' : h.target; hudShadow = '#3ddc97'; hudSub = h.darts + ' DARTS · ' + fmt(Math.max(0, 120 - h.time));
+        const seq = [...Array(20)].map((_, i) => i + 1).concat(25), idx = seq.indexOf(h.target);
+        clockTicks = seq.map((n, i) => ({ bg:i < idx || (h.over && s.result && s.result.win) ? '#3ddc97' : i === idx ? '#ffc94a' : 'rgba(255,244,224,.16)' }));
+      } else {
+        hudLabel = 'SCORE'; hudValue = h.score; hudShadow = '#ffc94a'; hudSub = Math.ceil(h.time) + 's · HOT ' + h.hot;
+        timePct = Math.min(100, h.time / 45 * 100) + '%'; timeColor = h.time < 10 ? '#ff5a5f' : '#ffc94a';
+        showMult = h.mult > 1; multText = '×' + h.mult + ' COMBO';
+      }
+      const blitz = h.mode === 'blitz';
+      turnSlots = [0, 1, 2].map(i => {
+        const e = h.turn[i], used = !blitz && i < h.thrown && !e;
+        const hot = e && e.score > 0;
+        return { empty:!e, filled:!!e, text:e ? e.label.replace('BULLSEYE', 'BULL') : '', bg:e ? (hot ? '#2f2760' : 'rgba(21,17,43,.8)') : 'rgba(21,17,43,.6)', fg:hot ? '#fff4e0' : '#8a84a8', dot:blitz ? '#ffc94a' : used ? 'rgba(255,244,224,.15)' : '#ffc94a' };
+      });
+    }
+    const r = s.result, M = r && Component.MODES.find(m => m.id === r.mode);
+    const res = r ? { ...r, modeName:M.name.toUpperCase(), shadow:r.win || r.mode === 'blitz' ? '#ff5a5f' : '#7b5cff',
+      stars:[0, 1, 2].map(i => ({ size:i === 1 ? '64px' : '50px', color:i < r.stars ? '#ffc94a' : 'rgba(255,244,224,.14)', delay:(0.35 + i * .22) + 's' })),
+      stats:[{ k:'DARTS', v:r.darts }, { k:'BULLS', v:r.stats.bulls }, { k:'TRIPLES', v:r.stats.triples }, { k:'ACCURACY', v:r.acc + '%' }] } : {};
+    return {
+      stageRef:this.stageRef, isHome:sc === 'home', isModes:sc === 'modes', isShop:sc === 'shop', isMissions:sc === 'missions',
+      isGame:sc === 'game' || sc === 'results', isPaused:s.paused && sc === 'game', isResults:sc === 'results', isLoading:!s.loaded,
+      level:p.level, coins:p.coins, xpPct:Math.round(p.xp / this.xpNeed(p.level) * 100) + '%', muteLabel:p.muted ? 'SFX OFF' : 'SFX ON',
+      hasClaimable:claimableCount > 0, claimableCount, modes, missions, shopItems, actionLabel, actionBg, actionFg,
+      tabDartsBg:darts ? '#ff5a5f' : 'transparent', tabDartsFg:darts ? '#15112b' : '#c9c1f0', tabBoardsBg:!darts ? '#ff5a5f' : 'transparent', tabBoardsFg:!darts ? '#15112b' : '#c9c1f0',
+      hudLabel, hudValue, hudSub, hudShadow, turnSlots, clockTicks, timePct, timeColor, showMult, multText, gameCoins:s.gameCoins,
+      isBlitz:!!h && h.mode === 'blitz', isClock:!!h && h.mode === 'clock', showHint:sc === 'game' && !s.hintSeen, res, coinDisp:s.coinDisp,
+      fxLayer:this.fx(),
+      goHome:() => this.go('home'), goModes:() => this.go('modes'), goShop:() => this.go('shop'), goMissions:() => this.go('missions'),
+      tabDarts:() => { this.click(); this.setState({ shopTab:'darts', shopSel:p.skin }); this.engine.setTheme(this.themeById(p.theme)); this.engine.setSkin(this.skinById(p.skin)); },
+      tabBoards:() => { this.click(); this.setState({ shopTab:'boards', shopSel:p.theme }); this.engine.setSkin(this.skinById(p.skin)); },
+      shopAction:() => this.shopAct(),
+      toggleMute:() => { const np = { ...p, muted:!p.muted }; this.save(np); setTimeout(() => { this.applyOpts(); this.click(); }, 0); },
+      pause:() => { this.click(); this.engine.pause(); this.setState({ paused:true }); },
+      resume:() => { this.click(); this.engine.resume(); this.setState({ paused:false }); },
+      restart:() => this.startMode(s.lastMode),
+      quit:() => { this.click(); this.engine.menu(); clearInterval(this.ci); this.setState({ screen:'home', paused:false, hud:null, result:null, pops:[], banners:[] }); },
+    };
+  }
+}
+</script>
+</body>
+</html>
