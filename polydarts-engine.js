@@ -23,8 +23,9 @@ const gauss = () => (Math.random()+Math.random()+Math.random()-1.5) / 1.5;
 const AIM = {
   wobIdle:.24, wobSteady:.08, wobMax:.42, wobOver:.3,     // reticle sway: while settling, in the green window, cap, growth/s once over-held
   settle:1.0, steadyLen:.5, steadyJitter:.15,             // s of stillness until green, green window length, ± random start per throw
-  stillV:.15,                                             // drag speed (board units, smoothed) above which the settle timer restarts
-  scatBase:.13, scatWob:.9, rushed:4, rushedPow:.8,       // landing spread; rushed = extra spread for releasing before green
+  stillMove:.05,                                          // net aim drift (board units, ~7px) that counts as moving and restarts the settle timer;
+                                                          // measured on a lagged aim point, so hand/finger tremor that goes back and forth doesn't count
+  scatBase:.09, scatWob:.9, rushed:4, rushedPow:1.7,      // landing spread; rushed = extra spread for releasing before green (huge for a tap, fading out near green)
   dragWob:.08, dragScat:.05,                              // extra sway / spread from recent dragging
   fatigue:.25, fatigueDecay:2.5,                          // sway added per throw, decaying per s — punishes rapid fire
   cooldown:.5, blitzCooldown:.5, hotBonus:1.5, blitzMiss:1, // s between darts; Blitz time bonus for a hot hit / time lost on a miss
@@ -182,7 +183,7 @@ export function createGame(el, cb = {}) {
   // state
   let opts = { sound:true, difficulty:1 };
   let mode = 'menu', paused = false, t = 0, last = performance.now(), raf = 0, shake = 0, dist = 11;
-  let G = null, holding = false, holdT = 0, dragV = 0, curA = .13, readyIn = 0, heldK = 0, lp = null, pid = null, emitKey = '';
+  let G = null, holding = false, holdT = 0, dragV = 0, aimSlow = { x:0, y:0 }, curA = .13, readyIn = 0, heldK = 0, lp = null, pid = null, emitKey = '';
   let steadyAt = AIM.settle, fat = 0, wobIn = 0, wasSteady = false;
   const wob = { x:0, y:0 }, wobTo = { x:0, y:0 };
   const aim = { x:0, y:0 }, aimP = new THREE.Vector2();
@@ -357,7 +358,7 @@ export function createGame(el, cb = {}) {
   const onMove = e => {
     if (!holding || e.pointerId !== pid) return;
     const s = 1.9*R / Math.max(320, el.clientWidth);
-    aim.x += (e.clientX - lp.x)*s; aim.y -= (e.clientY - lp.y)*s; dragV += Math.hypot(e.clientX - lp.x, e.clientY - lp.y)*s*4; lp = { x:e.clientX, y:e.clientY };
+    aim.x += (e.clientX - lp.x)*s; aim.y -= (e.clientY - lp.y)*s; lp = { x:e.clientX, y:e.clientY };
     const l = Math.hypot(aim.x, aim.y), mx = R*1.35; if (l > mx) { aim.x *= mx/l; aim.y *= mx/l; }
   };
   const onUp = e => { if (!holding || e.pointerId !== pid) return; holding = false; throwDart(); };
@@ -390,8 +391,11 @@ export function createGame(el, cb = {}) {
     }
     // aim
     if (playing) {
-      if (holding) holdT = dragV > AIM.stillV ? 0 : holdT + dt;
-      dragV *= Math.exp(-dt*6); fat *= Math.exp(-dt*AIM.fatigueDecay);
+      // how far the aim is from where it was ~0.15s ago: large while dragging, ~0 when holding still (even with tremor)
+      const sk = 1 - Math.exp(-dt/.15); aimSlow.x += (aim.x - aimSlow.x)*sk; aimSlow.y += (aim.y - aimSlow.y)*sk;
+      const drift = Math.hypot(aim.x - aimSlow.x, aim.y - aimSlow.y); dragV = drift*4.4;
+      if (holding) holdT = drift > AIM.stillMove ? 0 : holdT + dt;
+      fat *= Math.exp(-dt*AIM.fatigueDecay);
       const ph = phase(holdT), steadyNow = holding && ph === 'steady';
       if (steadyNow && !wasSteady) SFX.tick(); wasSteady = steadyNow;
       let A = !holding ? AIM.wobIdle : ph === 'settle' ? AIM.wobIdle - (AIM.wobIdle - AIM.wobSteady)*(holdT/steadyAt) : ph === 'steady' ? AIM.wobSteady : AIM.wobSteady + (holdT - steadyAt - AIM.steadyLen)*AIM.wobOver;
@@ -449,7 +453,7 @@ export function createGame(el, cb = {}) {
     stuck.forEach(s => s.g.parent && s.g.parent.remove(s.g)); stuck.length = 0;
   }
   return {
-    start(m) { reset(); spin.rotation.z = 0; G = newG(m); mode = 'play'; paused = false; aim.x = 0; aim.y = 0; readyIn = .9; holding = false; fat = 0; steadyAt = AIM.settle; emit(true); },
+    start(m) { reset(); spin.rotation.z = 0; G = newG(m); mode = 'play'; paused = false; aim.x = 0; aim.y = 0; aimSlow.x = 0; aimSlow.y = 0; readyIn = .9; holding = false; fat = 0; steadyAt = AIM.settle; emit(true); },
     pause() { paused = true; holding = false; }, resume() { paused = false; },
     menu() { reset(); G = null; mode = 'menu'; paused = false; placeMenuDarts(); },
     shop(on) { if (mode === 'play') return; mode = on ? 'shop' : 'menu'; },
